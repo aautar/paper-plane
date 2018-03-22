@@ -86,3 +86,5 @@ PaperPlane.ajax = function(_url, _method, _data, _onSuccess, _onError, _onComple
             });
     
 };
+
+export { PaperPlane };
