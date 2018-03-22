@@ -15,6 +15,10 @@ PaperPlane.calculateExpBackoff = function(_attemptNum) {
  */
 PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onComplete, _retryCount) {
     
+    if(typeof _onSuccess === 'undefined') {
+        _onSuccess = function() { };
+    }
+
     if(typeof _onError === 'undefined') {
         _onError = function() { };
     }
@@ -43,15 +47,20 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
         }
     };
 
-    return $.ajax({
-        url: _url,
-        method: "POST",
-        data: _formData,
-        success: _onSuccess,
-        error: wrapperErrorHander,
-        complete: _onComplete,
-        timeout: 60000
-    });    
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', _url);
+    xhr.send(_formData);
+    xhr.onload = function() {
+        if(xhr.status >= 400) {
+            wrapperErrorHander(xhr.response);
+        } else {
+            _onSuccess(xhr.response);
+        }
+
+        _onComplete(xhr.response);
+    };
+
+    return xhr;
 };
 
 /**
