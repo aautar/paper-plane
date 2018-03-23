@@ -13,7 +13,7 @@ PaperPlane.calculateExpBackoff = function(_attemptNum) {
  * @param {function} _onComplete
  * @returns {jqXHR}
  */
-PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onComplete, _retryCount) {
+PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onComplete, _numAttempts) {
     
     if(typeof _onSuccess === 'undefined') {
         _onSuccess = function() { };
@@ -27,23 +27,20 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
         _onComplete = function() { };
     }        
 
-    if(typeof _retryCount === 'undefined') {
-        _retryCount = 0;
+    if(typeof _numAttempts === 'undefined') {
+        _numAttempts = 1;
     }
-    
-    const wrapperErrorHander = function(r) {
-        if(r.statusCode >= 500) {
-            _retryCount--;
-        }
+   
+    const wrapperErrorHander = function(_xhr) {
 
-        if(_retryCount > 0) {
+        const numAttemptsRemaining = _numAttempts - 1;
 
+        if(_xhr.status >= 500 && numAttemptsRemaining > 0) {
             setTimeout(function() {
-                PaperPlane.postFormData(_url, _formData, _onSuccess, _onError, _onComplete, _retryCount);
-            }, PaperPlane.calculateExpBackoff);
-
+                PaperPlane.postFormData(_url, _formData, _onSuccess, _onError, _onComplete, numAttemptsRemaining-1);
+            }, PaperPlane.calculateExpBackoff(numAttemptsRemaining));
         } else {
-            _onError(r);
+            _onError(_xhr);
         }
     };
 
@@ -52,12 +49,12 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
     xhr.send(_formData);
     xhr.onload = function() {
         if(xhr.status >= 400) {
-            wrapperErrorHander(xhr.response);
+            wrapperErrorHander(xhr);
         } else {
-            _onSuccess(xhr.response);
+            _onSuccess(xhr);
         }
 
-        _onComplete(xhr.response);
+        _onComplete(xhr);
     };
 
     return xhr;
