@@ -1,20 +1,40 @@
 const PaperPlane = {};
 
+/**
+ * 
+ * @param {Number} _attemptNum 
+ */
 PaperPlane.calculateExpBackoff = function(_attemptNum) {
     return Math.min(5000, 100.0 * Math.pow(2, _attemptNum));
 };
 
 /**
+ * This callback is displayed as part of the Requester class.
+ * @callback PaperPlane~responseCallback
+ * @param {String|Object} responseData
+ * @param {XMLHttpRequest} xhr
+ */
+
+/**
  * 
  * @param {String} _url
  * @param {FormData} _formData
- * @param {function} _onSuccess
- * @param {function} _onError
- * @param {function} _onComplete
+ * @param {PaperPlane~responseCallback} _onSuccess
+ * @param {PaperPlane~responseCallback} _onError
+ * @param {PaperPlane~responseCallback} _onComplete
  * @param {Number} _numAttempts
  * @returns {XMLHttpRequest}
  */
 PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onComplete, _numAttempts) {
+
+    const getResponseData = function(_xhr) {
+        var responseData = _xhr.responseText;
+        if(_xhr.getResponseHeader('Content-Type') === "application/json") {
+            responseData = JSON.parse(responseData);
+        }
+
+        return responseData;
+    };
     
     const postMethod = function(_currentAttemptNum) {
 
@@ -34,7 +54,7 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
             _numAttempts = 1;
         }
 
-        const wrapperErrorHander = function(_xhr) {
+        const wrapperErrorHander = function(_xhr, _errorMessageHint) {
 
             const nextAttemptNum = _numAttempts - _currentAttemptNum;
             const numAttemptsRemaining = _numAttempts - _currentAttemptNum;
@@ -45,7 +65,7 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
                     postMethod(_currentAttemptNum-1);
                 }, PaperPlane.calculateExpBackoff(nextAttemptNum-1));
             } else {
-                _onError(_xhr);
+                _onError(_errorMessageHint || getResponseData(xhr), xhr);
             }
         };
 
@@ -56,18 +76,20 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
             if(xhr.status >= 400) {
                 wrapperErrorHander(xhr);
             } else {
-                _onSuccess(xhr);
+                _onSuccess(getResponseData(xhr), xhr);
             }
-
-            _onComplete(xhr);
         };
 
         xhr.ontimeout = function() {
-            wrapperErrorHander(xhr);
+            wrapperErrorHander(xhr, "client timeout");
         };
 
         xhr.onerror = function() {
             wrapperErrorHander(xhr);
+        };
+
+        xhr.onloadend = function() {
+            _onComplete(getResponseData(xhr), xhr);
         };
 
         xhr.send(_formData);    

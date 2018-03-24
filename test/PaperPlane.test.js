@@ -6,7 +6,8 @@ const xhrSuccessMockClass = () => ({
     setRequestHeader: jest.fn(),
     status: 200,
     readyState: 4,
-    responseText: 'test-response'
+    responseText: 'test-response',
+    getResponseHeader: function() { return "text/plain"; }
 });
 
 
@@ -65,7 +66,8 @@ test('postFormData retries failed ajax call once for _numAttempts=3', () => {
         status: 500,
         readyState: 4,
         responseText: 'test-response',
-        send: sendFunc
+        send: sendFunc,
+        getResponseHeader: function() { return "text/plain"; }
     });
 
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrServerFailureMockClass);
