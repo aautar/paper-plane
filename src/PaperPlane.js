@@ -19,13 +19,14 @@ PaperPlane.calculateExpBackoff = function(_attemptNum) {
  * 
  * @param {String} _url
  * @param {FormData} _formData
- * @param {PaperPlane~responseCallback} _onSuccess
- * @param {PaperPlane~responseCallback} _onError
- * @param {PaperPlane~responseCallback} _onComplete
- * @param {Number} _numAttempts
+ * @param {PaperPlane~responseCallback} [_onSuccess]
+ * @param {PaperPlane~responseCallback} [_onError]
+ * @param {PaperPlane~responseCallback} [_onComplete]
+ * @param {Number} [_numAttempts=1]
+ * @param {Boolean} [_canRetryOnServerError=false]
  * @returns {XMLHttpRequest}
  */
-PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onComplete, _numAttempts) {
+PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onComplete, _numAttempts, _canRetryOnServerError) {
 
     const getResponseData = function(_xhr) {
         var responseData = _xhr.responseText;
@@ -38,28 +39,18 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
     
     const postMethod = function(_currentAttemptNum) {
 
-        if(typeof _onSuccess === 'undefined') {
-            _onSuccess = function() { };
-        }
-
-        if(typeof _onError === 'undefined') {
-            _onError = function() { };
-        }
-        
-        if(typeof _onComplete === 'undefined') {
-            _onComplete = function() { };
-        }        
-
-        if(typeof _numAttempts === 'undefined') {
-            _numAttempts = 1;
-        }
+        _onSuccess = _onSuccess || (() => {});
+        _onError = _onError || (() => {});        
+        _onComplete = _onComplete || (() => {});
+        _numAttempts = _numAttempts || 1;
+        _canRetryOnServerError = _canRetryOnServerError || false;
 
         const wrapperErrorHander = function(_xhr, _errorMessageHint) {
 
             const nextAttemptNum = _numAttempts - _currentAttemptNum;
             const numAttemptsRemaining = _numAttempts - _currentAttemptNum;
-            const isRetryableError = (_xhr.readyState === 0 || (_xhr.readyState === 4 && _xhr.status >= 500));
-            
+            const isRetryableError = (_xhr.readyState === 0 || (_canRetryOnServerError && _xhr.readyState === 4 && _xhr.status >= 500));
+           
             if(numAttemptsRemaining > 0 && isRetryableError) {
                 setTimeout(function() {
                     postMethod(_currentAttemptNum-1);
