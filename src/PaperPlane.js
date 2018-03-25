@@ -22,11 +22,12 @@ PaperPlane.calculateExpBackoff = function(_attemptNum) {
  * @param {PaperPlane~responseCallback} [_onSuccess]
  * @param {PaperPlane~responseCallback} [_onError]
  * @param {PaperPlane~responseCallback} [_onComplete]
+ * @param {Map} [_httpHeaders=new Map()]
  * @param {Number} [_numAttempts=1]
  * @param {Boolean} [_canRetryOnServerError=false]
  * @returns {XMLHttpRequest}
  */
-PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onComplete, _numAttempts, _canRetryOnServerError) {
+PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onComplete, _httpHeaders, _numAttempts, _canRetryOnServerError) {
 
     const getResponseData = function(_xhr) {
         var responseData = _xhr.responseText;
@@ -42,6 +43,7 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
         _onSuccess = _onSuccess || (() => {});
         _onError = _onError || (() => {});        
         _onComplete = _onComplete || (() => {});
+        _httpHeaders = _httpHeaders || (new Map());
         _numAttempts = _numAttempts || 1;
         _canRetryOnServerError = _canRetryOnServerError || false;
 
@@ -62,6 +64,11 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', _url);
+
+        for (let [key,value] of _httpHeaders) {
+            xhr.setRequestHeader(key, value);
+        }
+
         xhr.timeout = 30000;
         xhr.onload = function() {
             if(xhr.status >= 400) {

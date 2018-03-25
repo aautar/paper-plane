@@ -41,6 +41,20 @@ test('postFormData makes successful ajax call and calls success callback', () =>
     expect(onSuccess).toHaveBeenCalled();    
 });
 
+test('postFormData makes successful ajax call with headers', () => {
+
+    window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
+
+    const headers = new Map();
+    headers.set('X-Custom-Header', 'header-value');
+
+    const onSuccess = jest.fn();
+    const xhr = PaperPlane.postFormData("/test-url", new FormData(), onSuccess, ()=>{}, ()=>{}, headers);
+    xhr.onload();
+
+    expect(xhr.setRequestHeader).toHaveBeenLastCalledWith('X-Custom-Header', 'header-value');
+});
+
 test('postFormData makes failed ajax call and calls failure callback', () => {
 
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
@@ -77,7 +91,7 @@ test('postFormData retries failed ajax call, for server-side errors, for _numAtt
     const onSuccess = jest.fn();
     const onFailure = jest.fn();
     const onComplete = jest.fn();
-    PaperPlane.postFormData("/test-url", new FormData(), onSuccess, onFailure, onComplete, 3, true);
+    PaperPlane.postFormData("/test-url", new FormData(), onSuccess, onFailure, onComplete, new Map(), 3, true);
 
     expect(setTimeout).toHaveBeenCalledTimes(1); 
     expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 200);
@@ -111,7 +125,7 @@ test('postFormData does not retry ajax call, on server-side error, for _numAttem
     const onSuccess = jest.fn();
     const onFailure = jest.fn();
     const onComplete = jest.fn();
-    PaperPlane.postFormData("/test-url", new FormData(), onSuccess, onFailure, onComplete, 3, false);
+    PaperPlane.postFormData("/test-url", new FormData(), onSuccess, onFailure, onComplete, new Map(), 3, false);
 
     expect(onFailure).toHaveBeenCalled();   
     expect(setTimeout).toHaveBeenCalledTimes(0); 
