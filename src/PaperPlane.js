@@ -1,5 +1,7 @@
 const PaperPlane = {};
 
+PaperPlane.CLIENT_TIMEOUT_ERROR_TEXT = "client timeout";
+
 /**
  * 
  * @param {Number} _attemptNum 
@@ -92,7 +94,7 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
         };
 
         xhr.ontimeout = function() {
-            internalErrorHander(xhr, "client timeout");
+            internalErrorHander(xhr, PaperPlane.CLIENT_TIMEOUT_ERROR_TEXT);
         };
 
         xhr.onerror = function() {
@@ -168,7 +170,7 @@ PaperPlane.ajax = function(_url, _method, _payload, _onSuccess, _onError, _onCom
         };
 
         xhr.ontimeout = function() {
-            internalErrorHander(xhr, "client timeout");
+            internalErrorHander(xhr, PaperPlane.CLIENT_TIMEOUT_ERROR_TEXT);
         };
 
         xhr.onerror = function() {
