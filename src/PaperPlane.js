@@ -115,8 +115,8 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
 
 /**
  * 
- * @param {String} _url
  * @param {String} _method
+ * @param {String} _url
  * @param {String} [_payload]
  * @param {PaperPlane~responseCallback} [_onSuccess]
  * @param {PaperPlane~responseCallback} [_onError]
@@ -126,7 +126,7 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
  * @param {Boolean} [_canRetryOnServerError=false]
  * @returns {XMLHttpRequest}
  */
-PaperPlane.ajax = function(_url, _method, _payload, _onSuccess, _onError, _onComplete, _httpHeaders, _numAttempts, _canRetryOnServerError) {
+PaperPlane.ajax = function(_method, _url, _payload, _onSuccess, _onError, _onComplete, _httpHeaders, _numAttempts, _canRetryOnServerError) {
     
     _payload = _payload || '';
     _onSuccess = _onSuccess || (() => {});

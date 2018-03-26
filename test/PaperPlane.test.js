@@ -130,3 +130,16 @@ test('postFormData does not retry ajax call, on server-side error, for _numAttem
     expect(onFailure).toHaveBeenCalled();   
     expect(setTimeout).toHaveBeenCalledTimes(0); 
 });
+
+test('ajax makes successful ajax call and calls success callback', () => {
+
+    window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
+
+    const onSuccess = jest.fn();
+    const xhr = PaperPlane.ajax("GET", "/test-url", "payload", onSuccess);
+    xhr.onload();
+
+    expect(xhr.open).toHaveBeenCalled();
+    expect(xhr.send).toHaveBeenCalled();    
+    expect(onSuccess).toHaveBeenCalled();    
+});
