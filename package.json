@@ -8,9 +8,7 @@
   "scripts": {
     "test": "jest"
   },
-  "dependencies": {
-    "jquery": "2.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel-preset-env": "^1.6.1",
     "jest": "^22.4.3"
