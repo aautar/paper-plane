@@ -115,33 +115,76 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
  * 
  * @param {String} _url
  * @param {String} _method
- * @param {object} _data
- * @param {function} _onSuccess
- * @param {function} _onError
- * @param {function} _onComplete
- * @returns {jqXHR}
+ * @param {String} [_payload]
+ * @param {PaperPlane~responseCallback} [_onSuccess]
+ * @param {PaperPlane~responseCallback} [_onError]
+ * @param {PaperPlane~responseCallback} [_onComplete]
+ * @param {Map} [_httpHeaders=new Map()]
+ * @param {Number} [_numAttempts=1]
+ * @param {Boolean} [_canRetryOnServerError=false]
+ * @returns {XMLHttpRequest}
  */
-PaperPlane.ajax = function(_url, _method, _data, _onSuccess, _onError, _onComplete) {
+PaperPlane.ajax = function(_url, _method, _payload, _onSuccess, _onError, _onComplete, _httpHeaders, _numAttempts, _canRetryOnServerError) {
     
-    if(typeof _onError === 'undefined') {
-        _onError = function() { };
-    }
+    _payload = _payload || '';
+    _onSuccess = _onSuccess || (() => {});
+    _onError = _onError || (() => {});        
+    _onComplete = _onComplete || (() => {});
+    _httpHeaders = _httpHeaders || (new Map());
+    _numAttempts = _numAttempts || 1;
+    _canRetryOnServerError = _canRetryOnServerError || false;    
     
-    if(typeof _onComplete === 'undefined') {
-        _onComplete = function() { };
-    }    
-    
-    return $.ajax({
-                url: _url,
-                method: _method,
-                dataType: 'json',
-                data: _data,
-                success: _onSuccess,
-                error: _onError,
-                complete: _onComplete,
-                timeout: 8000
-            });
-    
+    const internalAjaxMethod = function(_currentAttemptNum) {
+
+        const internalErrorHander = function(_xhr, _errorMessageHint) {
+
+            const nextAttemptNum = _numAttempts - _currentAttemptNum;
+            const numAttemptsRemaining = _numAttempts - _currentAttemptNum;
+            const isRetryableError = PaperPlane.isRetryableError(_xhr, _canRetryOnServerError);
+           
+            if(numAttemptsRemaining > 0 && isRetryableError) {
+                setTimeout(function() {
+                    internalAjaxMethod(_currentAttemptNum-1);
+                }, PaperPlane.calculateExpBackoff(nextAttemptNum-1));
+            } else {
+                _onError(_errorMessageHint || PaperPlane.parseXHRResponseData(xhr), xhr);
+            }
+        };
+
+        const xhr = new XMLHttpRequest();
+        xhr.open(_method, _url);
+
+        for (let [key,value] of _httpHeaders) {
+            xhr.setRequestHeader(key, value);
+        }
+
+        xhr.timeout = 30000;
+        xhr.onload = function() {
+            if(xhr.status >= 400) {
+                internalErrorHander(xhr);
+            } else {
+                _onSuccess(PaperPlane.parseXHRResponseData(xhr), xhr);
+            }
+        };
+
+        xhr.ontimeout = function() {
+            internalErrorHander(xhr, "client timeout");
+        };
+
+        xhr.onerror = function() {
+            internalErrorHander(xhr);
+        };
+
+        xhr.onloadend = function() {
+            _onComplete(PaperPlane.parseXHRResponseData(xhr), xhr);
+        };
+
+        xhr.send(_payload);    
+
+        return xhr;
+    };
+
+    return internalAjaxMethod(1);    
 };
 
 export { PaperPlane };
