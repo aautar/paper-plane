@@ -9,7 +9,29 @@ PaperPlane.calculateExpBackoff = function(_attemptNum) {
 };
 
 /**
- * This callback is displayed as part of the Requester class.
+ * 
+ * @param {XMLHttpRequest} _xhr 
+ * @returns {String|Object}
+ */
+PaperPlane.parseXHRResponseData = function(_xhr) {
+    if(_xhr.getResponseHeader('Content-Type') === "application/json") {
+        return JSON.parse(responseData);
+    }
+
+    return _xhr.responseText;
+};
+
+/**
+ * 
+ * @param {XMLHttpRequest} _xhr 
+ * @param {Boolean} _canRetryOnServerError 
+ * @returns {Boolean}
+ */
+PaperPlane.isRetryableError = function(_xhr, _canRetryOnServerError) {
+    return (_xhr.readyState === 0 || (_canRetryOnServerError && _xhr.readyState === 4 && _xhr.status >= 500));
+};
+
+/**
  * @callback PaperPlane~responseCallback
  * @param {String|Object} responseData
  * @param {XMLHttpRequest} xhr
@@ -29,36 +51,27 @@ PaperPlane.calculateExpBackoff = function(_attemptNum) {
  */
 PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onComplete, _httpHeaders, _numAttempts, _canRetryOnServerError) {
 
-    const getResponseData = function(_xhr) {
-        var responseData = _xhr.responseText;
-        if(_xhr.getResponseHeader('Content-Type') === "application/json") {
-            responseData = JSON.parse(responseData);
-        }
+    _onSuccess = _onSuccess || (() => {});
+    _onError = _onError || (() => {});        
+    _onComplete = _onComplete || (() => {});
+    _httpHeaders = _httpHeaders || (new Map());
+    _numAttempts = _numAttempts || 1;
+    _canRetryOnServerError = _canRetryOnServerError || false;    
 
-        return responseData;
-    };
-    
     const postMethod = function(_currentAttemptNum) {
 
-        _onSuccess = _onSuccess || (() => {});
-        _onError = _onError || (() => {});        
-        _onComplete = _onComplete || (() => {});
-        _httpHeaders = _httpHeaders || (new Map());
-        _numAttempts = _numAttempts || 1;
-        _canRetryOnServerError = _canRetryOnServerError || false;
-
-        const wrapperErrorHander = function(_xhr, _errorMessageHint) {
+        const internalErrorHander = function(_xhr, _errorMessageHint) {
 
             const nextAttemptNum = _numAttempts - _currentAttemptNum;
             const numAttemptsRemaining = _numAttempts - _currentAttemptNum;
-            const isRetryableError = (_xhr.readyState === 0 || (_canRetryOnServerError && _xhr.readyState === 4 && _xhr.status >= 500));
+            const isRetryableError = PaperPlane.isRetryableError(_xhr, _canRetryOnServerError);
            
             if(numAttemptsRemaining > 0 && isRetryableError) {
                 setTimeout(function() {
                     postMethod(_currentAttemptNum-1);
                 }, PaperPlane.calculateExpBackoff(nextAttemptNum-1));
             } else {
-                _onError(_errorMessageHint || getResponseData(xhr), xhr);
+                _onError(_errorMessageHint || PaperPlane.parseXHRResponseData(xhr), xhr);
             }
         };
 
@@ -72,22 +85,22 @@ PaperPlane.postFormData = function(_url, _formData, _onSuccess, _onError, _onCom
         xhr.timeout = 30000;
         xhr.onload = function() {
             if(xhr.status >= 400) {
-                wrapperErrorHander(xhr);
+                internalErrorHander(xhr);
             } else {
-                _onSuccess(getResponseData(xhr), xhr);
+                _onSuccess(PaperPlane.parseXHRResponseData(xhr), xhr);
             }
         };
 
         xhr.ontimeout = function() {
-            wrapperErrorHander(xhr, "client timeout");
+            internalErrorHander(xhr, "client timeout");
         };
 
         xhr.onerror = function() {
-            wrapperErrorHander(xhr);
+            internalErrorHander(xhr);
         };
 
         xhr.onloadend = function() {
-            _onComplete(getResponseData(xhr), xhr);
+            _onComplete(PaperPlane.parseXHRResponseData(xhr), xhr);
         };
 
         xhr.send(_formData);    
