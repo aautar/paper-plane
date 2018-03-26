@@ -135,7 +135,7 @@ PaperPlane.ajax = function(_method, _url, _payload, _onSuccess, _onError, _onCom
     _httpHeaders = _httpHeaders || (new Map());
     _numAttempts = _numAttempts || 1;
     _canRetryOnServerError = _canRetryOnServerError || false;    
-    
+   
     const internalAjaxMethod = function(_currentAttemptNum) {
 
         const internalErrorHander = function(_xhr, _errorMessageHint) {
@@ -143,7 +143,7 @@ PaperPlane.ajax = function(_method, _url, _payload, _onSuccess, _onError, _onCom
             const nextAttemptNum = _numAttempts - _currentAttemptNum;
             const numAttemptsRemaining = _numAttempts - _currentAttemptNum;
             const isRetryableError = PaperPlane.isRetryableError(_xhr, _canRetryOnServerError);
-           
+          
             if(numAttemptsRemaining > 0 && isRetryableError) {
                 setTimeout(function() {
                     internalAjaxMethod(_currentAttemptNum-1);
