@@ -1,6 +1,6 @@
 {
   "name": "paper-plane",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "main": "src/PaperPlane.js",
   "repository": "https://github.com/aautar/paper-plane.git",
   "author": "Avishkar Autar <aautar@digital-radiation.com>",
@@ -8,9 +8,7 @@
   "scripts": {
     "test": "jest"
   },
-  "dependencies": {
-    "jquery": "2.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel-preset-env": "^1.6.1",
     "jest": "^22.4.3"
