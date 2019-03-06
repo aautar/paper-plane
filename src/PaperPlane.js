@@ -1,14 +1,5 @@
 const PaperPlane = {};
 
-PaperPlane.HttpMethod = {
-    GET: "GET",
-    HEAD: "HEAD",
-    POST: "POST",
-    PATCH: "PATCH",
-    PUT: "PUT",
-    DELETE: "DELETE"
-};
-
 PaperPlane.ContentType = {
     APPLICATION_JSON: "application/json"
 };
@@ -20,11 +11,40 @@ PaperPlane.ContentType = {
  */
 PaperPlane.parseXHRResponseData = function(_xhr) {
     if(_xhr.getResponseHeader('Content-Type') === PaperPlane.ContentType.APPLICATION_JSON) {
-        return JSON.parse(responseData);
+        return JSON.parse(_xhr.responseText);
     }
 
     return _xhr.responseText;
 };
+
+/**
+ * @param {FormData} _data
+ * @param {Map} _httpHeaders
+ * @returns {Object}
+ */
+PaperPlane.makeFormDataRequestData = function(_data, _httpHeaders) {
+    return {
+        body: _data,
+        headers: (_httpHeaders || new Map())
+    };
+};
+
+/**
+ * @param {Object} _data
+ * @param {Map} _httpHeaders
+ * @returns {Object}
+ */
+PaperPlane.makeJsonRequestData = function(_data, _httpHeaders) {
+
+    _httpHeaders = _httpHeaders || (new Map());
+    _httpHeaders.set("Content-Type", PaperPlane.ContentType.APPLICATION_JSON);
+
+    return {
+        body: JSON.stringify(_data),
+        headers: _httpHeaders
+    };
+};
+
 
 /**
  * @callback PaperPlane~responseCallback
@@ -32,27 +52,26 @@ PaperPlane.parseXHRResponseData = function(_xhr) {
  * @param {XMLHttpRequest} xhr
  */
 
+
 /**
  * 
  * @param {String} _method
  * @param {String} _url
- * @param {FormData} _formData
- * @param {Map} [_httpHeaders=new Map()]
+ * @param {Object} _requestData
  * @param {PaperPlane~responseCallback} [_onSuccess]
  * @param {PaperPlane~responseCallback} [_onError]
  * @param {PaperPlane~responseCallback} [_onComplete]
  * @returns {XMLHttpRequest}
  */
-PaperPlane.sendFormData = function(
+PaperPlane.xhr = function(
     _method, 
     _url, 
-    _formData, 
-    _httpHeaders,
+    _requestData,
     _onSuccess, 
     _onError, 
     _onComplete
 ) {
-    _httpHeaders = _httpHeaders || (new Map());
+    const httpHeaders = _requestData.headers;
     _onSuccess = _onSuccess || (() => {});
     _onError = _onError || (() => {});        
     _onComplete = _onComplete || (() => {});    
@@ -64,7 +83,7 @@ PaperPlane.sendFormData = function(
     const xhr = new XMLHttpRequest();
     xhr.open(_method, _url);
 
-    for (let [key,value] of _httpHeaders) {
+    for (let [key,value] of httpHeaders) {
         xhr.setRequestHeader(key, value);
     }
 
@@ -89,7 +108,7 @@ PaperPlane.sendFormData = function(
         _onComplete(PaperPlane.parseXHRResponseData(xhr), xhr);
     };
 
-    xhr.send(_formData);    
+    xhr.send(_requestData.body);    
 
     return xhr;
 };
@@ -97,126 +116,138 @@ PaperPlane.sendFormData = function(
 /**
  * 
  * @param {String} _url
- * @param {String} _method
- * @param {Object} _data
- * @param {Map} [_httpHeaders=new Map()]
+ * @param {Object} _requestData
  * @param {PaperPlane~responseCallback} _onSuccess
  * @param {PaperPlane~responseCallback} _onError
  * @param {PaperPlane~responseCallback} _onComplete
  * @returns {XMLHttpRequest}
  */
-PaperPlane.sendJson = function(
-    _method, 
+PaperPlane.post = function(
     _url, 
-    _data, 
-    _httpHeaders,
+    _requestData,
     _onSuccess, 
     _onError, 
     _onComplete
 ) {
-    _httpHeaders = _httpHeaders || (new Map());
-    _onSuccess = _onSuccess || (() => {});
-    _onError = _onError || (() => {});        
-    _onComplete = _onComplete || (() => {});    
-
-    const internalErrorHander = function(_xhr, _errorMessageHint) {          
-        _onError(_errorMessageHint || PaperPlane.parseXHRResponseData(xhr), xhr);
-    };
-
-    const xhr = new XMLHttpRequest();
-    xhr.open(_method, _url);    
-
-    for (let [key,value] of _httpHeaders) {
-        xhr.setRequestHeader(key, value);
-    }
-        
-    xhr.timeout = 30000;
-
-    xhr.onload = function() {
-        if(xhr.status >= 400) {
-            internalErrorHander(xhr);
-        } else {
-            _onSuccess(PaperPlane.parseXHRResponseData(xhr), xhr);
-        }
-    };
-
-    xhr.ontimeout = function() {
-        internalErrorHander(xhr, "client timeout");
-    };
-
-    xhr.onerror = function() {
-        internalErrorHander(xhr);
-    };
-
-    xhr.onloadend = function() {
-        _onComplete(PaperPlane.parseXHRResponseData(xhr), xhr);
-    };    
-
-    xhr.setRequestHeader("Content-Type", PaperPlane.ContentType.APPLICATION_JSON);
-    xhr.send(JSON.stringify(_data));   
-    
-    return xhr;    
+    return PaperPlane.xhr(
+        "POST",
+        _url,
+        _requestData,
+        _onSuccess,
+        _onError,
+        _onComplete
+    );
 };
 
 
 /**
- * @param {String} _method
- * @param {String} _url 
- * @param {Map} [_httpHeaders=new Map()]
+ * 
+ * @param {String} _url
+ * @param {Object} _requestData
  * @param {PaperPlane~responseCallback} _onSuccess
  * @param {PaperPlane~responseCallback} _onError
  * @param {PaperPlane~responseCallback} _onComplete
  * @returns {XMLHttpRequest}
  */
-PaperPlane.recv = function(
-    _method,
+PaperPlane.put = function(
+    _url, 
+    _requestData,
+    _onSuccess, 
+    _onError, 
+    _onComplete
+) {
+    return PaperPlane.xhr(
+        "PUT",
+        _url,
+        _requestData,
+        _onSuccess,
+        _onError,
+        _onComplete
+    );
+
+};
+
+
+/**
+ * 
+ * @param {String} _url
+ * @param {Object} _requestData
+ * @param {PaperPlane~responseCallback} _onSuccess
+ * @param {PaperPlane~responseCallback} _onError
+ * @param {PaperPlane~responseCallback} _onComplete
+ * @returns {XMLHttpRequest}
+ */
+PaperPlane.delete = function(
+    _url, 
+    _requestData,
+    _onSuccess, 
+    _onError, 
+    _onComplete
+) {
+    return PaperPlane.xhr(
+        "DELETE",
+        _url,
+        _requestData,
+        _onSuccess,
+        _onError,
+        _onComplete
+    );
+};
+
+/**
+ * @param {String} _url 
+ * @param {Object} [_httpHeaders={}]
+ * @param {PaperPlane~responseCallback} _onSuccess
+ * @param {PaperPlane~responseCallback} _onError
+ * @param {PaperPlane~responseCallback} _onComplete
+ * @returns {XMLHttpRequest}
+ */
+PaperPlane.get = function(
     _url, 
     _httpHeaders,
     _onSuccess, 
     _onError, 
     _onComplete
 ) {
-    _httpHeaders = _httpHeaders || (new Map());
-    _onSuccess = _onSuccess || (() => {});
-    _onError = _onError || (() => {});        
-    _onComplete = _onComplete || (() => {});    
+    return PaperPlane.xhr(
+        "GET",
+        _url,
+        {
+            body: null,
+            headers: _httpHeaders
+        },
+        _onSuccess,
+        _onError,
+        _onComplete
+    ); 
+};
 
-    const internalErrorHander = function(_xhr, _errorMessageHint) {          
-        _onError(_errorMessageHint || PaperPlane.parseXHRResponseData(xhr), xhr);
-    };
-
-    const xhr = new XMLHttpRequest();
-    xhr.open(_method, _url);    
-
-    for (let [key,value] of _httpHeaders) {
-        xhr.setRequestHeader(key, value);
-    }
-        
-    xhr.timeout = 30000;
-
-    xhr.onload = function() {
-        if(xhr.status >= 400) {
-            internalErrorHander(xhr);
-        } else {
-            _onSuccess(PaperPlane.parseXHRResponseData(xhr), xhr);
-        }
-    };
-
-    xhr.ontimeout = function() {
-        internalErrorHander(xhr, "client timeout");
-    };
-
-    xhr.onerror = function() {
-        internalErrorHander(xhr);
-    };
-
-    xhr.onloadend = function() {
-        _onComplete(PaperPlane.parseXHRResponseData(xhr), xhr);
-    };    
-
-    xhr.send(null);   
-    
-    return xhr;    
+/**
+ * @param {String} _url 
+ * @param {Object} [_httpHeaders={}]
+ * @param {PaperPlane~responseCallback} _onSuccess
+ * @param {PaperPlane~responseCallback} _onError
+ * @param {PaperPlane~responseCallback} _onComplete
+ * @returns {XMLHttpRequest}
+ */
+PaperPlane.head = function(
+    _url, 
+    _httpHeaders,
+    _onSuccess, 
+    _onError, 
+    _onComplete
+) {
+    return PaperPlane.xhr(
+        "HEAD",
+        _url,
+        {
+            body: null,
+            headers: _httpHeaders
+        },
+        _onSuccess,
+        _onError,
+        _onComplete
+    ); 
 };
 
 export { PaperPlane };

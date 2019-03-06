@@ -16,12 +16,18 @@ beforeEach(() => {
 });
 
 
-test('sendFormData makes successful ajax call and calls success callback', () => {
+test('xhr makes successful ajax call and calls success callback', () => {
 
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
 
     const onSuccess = jest.fn();
-    const xhr = PaperPlane.sendFormData(PaperPlane.HttpMethod.POST, "/test-url", new FormData(), new Map(), onSuccess);
+    const xhr = PaperPlane.xhr(
+        "POST", 
+        "/test-url", 
+        PaperPlane.makeFormDataRequestData(new FormData(), new Map()), 
+        onSuccess
+    );
+
     xhr.onload();
 
     expect(xhr.open).toHaveBeenCalled();
@@ -30,28 +36,40 @@ test('sendFormData makes successful ajax call and calls success callback', () =>
 });
 
 
-test('sendFormData makes successful ajax call with headers', () => {
+test('xhr makes successful ajax call with headers', () => {
 
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
 
-    const headers = new Map();
-    headers.set('X-Custom-Header', 'header-value');
-
     const onSuccess = jest.fn();
-    const xhr = PaperPlane.sendFormData(PaperPlane.HttpMethod.POST, "/test-url", new FormData(), headers, onSuccess);
+    
+    const xhr = PaperPlane.xhr(
+        "POST", 
+        "/test-url", 
+        PaperPlane.makeFormDataRequestData(new FormData(), new Map([['X-Custom-Header', 'header-value']])), 
+        onSuccess
+    );
+
     xhr.onload();
 
     expect(xhr.setRequestHeader).toHaveBeenLastCalledWith('X-Custom-Header', 'header-value');
 });
 
 
-test('sendFormData makes failed ajax call and calls failure callback', () => {
+test('xhr makes failed ajax call and calls failure callback', () => {
 
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
 
     const onSuccess = jest.fn();
     const onFailure = jest.fn();
-    const xhr = PaperPlane.sendFormData(PaperPlane.HttpMethod.POST, "/test-url", new FormData(), new Map(), onSuccess, onFailure);
+
+    const xhr = PaperPlane.xhr(
+        "POST", 
+        "/test-url", 
+        PaperPlane.makeFormDataRequestData(new FormData(), new Map()),
+        onSuccess, 
+        onFailure
+    );
+
     xhr.status = 500;
     xhr.onload();
 
@@ -60,39 +78,18 @@ test('sendFormData makes failed ajax call and calls failure callback', () => {
     expect(onFailure).toHaveBeenCalled();    
 });
 
-test('sendJson makes successful ajax call and calls success callback', () => {
+
+test('get makes successful ajax call and calls success callback', () => {
 
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
 
     const onSuccess = jest.fn();
-    const xhr = PaperPlane.sendJson(PaperPlane.HttpMethod.POST, "/test-url", { "testKey": "testValue" }, new Map(), onSuccess);
-    xhr.onload();
+    const xhr = PaperPlane.get( 
+        "/test-url", 
+        new Map(), 
+        onSuccess
+    );
 
-    expect(xhr.open).toHaveBeenCalled();
-    expect(xhr.send).toHaveBeenCalled();    
-    expect(onSuccess).toHaveBeenCalled();    
-});
-
-
-test('ajax makes successful ajax call and calls success callback', () => {
-
-    window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
-
-    const onSuccess = jest.fn();
-    const xhr = PaperPlane.recv(PaperPlane.HttpMethod.POST, "/test-url", new Map(), onSuccess);
-    xhr.onload();
-
-    expect(xhr.open).toHaveBeenCalled();
-    expect(xhr.send).toHaveBeenCalled();    
-    expect(onSuccess).toHaveBeenCalled();    
-});
-
-test('ajax makes successful ajax call and calls success callback', () => {
-
-    window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
-
-    const onSuccess = jest.fn();
-    const xhr = PaperPlane.recv(PaperPlane.HttpMethod.POST, "/test-url", new Map(), onSuccess);
     xhr.onload();
 
     expect(xhr.open).toHaveBeenCalled();
