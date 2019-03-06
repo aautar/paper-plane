@@ -19,7 +19,7 @@ PaperPlane.parseXHRResponseData = function(_xhr) {
 
 /**
  * @param {FormData} _data
- * @param {Map} _httpHeaders
+ * @param {Map=} _httpHeaders
  * @returns {Object}
  */
 PaperPlane.makeFormDataRequestData = function(_data, _httpHeaders) {
@@ -31,7 +31,7 @@ PaperPlane.makeFormDataRequestData = function(_data, _httpHeaders) {
 
 /**
  * @param {Object} _data
- * @param {Map} _httpHeaders
+ * @param {Map=} _httpHeaders
  * @returns {Object}
  */
 PaperPlane.makeJsonRequestData = function(_data, _httpHeaders) {
@@ -248,6 +248,17 @@ PaperPlane.head = function(
         _onError,
         _onComplete
     ); 
+};
+
+
+/**
+ * 
+ * @param {String} _url
+ * @param {Object} _requestData
+ * @returns {Boolean}
+ */
+PaperPlane.postBeacon = function(_url, _requestData) {
+    return navigator.sendBeacon(_url, _requestData.body);
 };
 
 export { PaperPlane };
