@@ -78,6 +78,35 @@ test('xhr makes failed ajax call and calls failure callback', () => {
     expect(onFailure).toHaveBeenCalled();    
 });
 
+test('xhr makes failed ajax call and calls failure callback, with bad response body (JSON content expected, but invalid JSON in body)', () => {
+    window.XMLHttpRequest = () => ({
+        open: jest.fn(),
+        send: jest.fn(),
+        setRequestHeader: jest.fn(),
+        status: 200,
+        readyState: 4,
+        responseText: 'test-response',
+        getResponseHeader: function() { return "application/json"; }
+    });
+    
+    const onSuccess = jest.fn();
+    const onFailure = jest.fn();
+
+    const xhr = PaperPlane.xhr(
+        "POST", 
+        "/test-url", 
+        PaperPlane.makeFormDataRequestData(new FormData(), new Map()),
+        onSuccess, 
+        onFailure
+    );
+
+    xhr.status = 500;
+    xhr.onload();
+
+    expect(xhr.open).toHaveBeenCalled();
+    expect(xhr.send).toHaveBeenCalled();    
+    expect(onFailure).toHaveBeenCalled();    
+});
 
 test('get makes successful ajax call and calls success callback', () => {
 
