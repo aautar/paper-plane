@@ -11,7 +11,7 @@ PaperPlane.ContentType = {
  */
 PaperPlane.parseXHRResponseData = function(_xhr) {
     if(_xhr.getResponseHeader('Content-Type') === PaperPlane.ContentType.APPLICATION_JSON) {
-        const parsedResponseBody = {};
+        var parsedResponseBody = {};
         
         try {
             parsedResponseBody = JSON.parse(_xhr.responseText);

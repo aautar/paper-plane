@@ -1,6 +1,6 @@
 {
   "name": "paper-plane",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "main": "src/PaperPlane.js",
   "repository": "https://github.com/aautar/paper-plane.git",
   "author": "Avishkar Autar <aautar@digital-radiation.com>",
