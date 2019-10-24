@@ -39,3 +39,6 @@ jobs:
       - run: sudo npm install --global rollup
       
       - run: rollup -c
+
+      - store_artifacts:
+          path: ~/repo
