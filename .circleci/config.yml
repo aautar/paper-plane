@@ -36,4 +36,6 @@ jobs:
       # run tests!
       - run: yarn test
 
-
+      - run: npm install --global 
+      
+      - run: ./rollup -c
