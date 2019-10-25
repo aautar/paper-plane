@@ -13,8 +13,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@babel/preset-env": "^7.3.4",
-    "jest": "^24.1.0",
+    "@babel/preset-env": "^7.6.3",
+    "jest": "^24.9.0",
     "rollup-plugin-babel-minify": "^9.1.0"
   }
 }
