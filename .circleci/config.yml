@@ -42,7 +42,7 @@ jobs:
           name: Updating version num
           command: |
             if [[ "${CIRCLE_TAG}" =~ v[0-9]+(\.[0-9]+)* ]]; then
-              npm version ${CIRCLE_TAG:1}
+              npm version from-git
             fi
 
       - store_artifacts:
