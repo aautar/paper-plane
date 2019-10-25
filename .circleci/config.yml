@@ -1,7 +1,3 @@
-# Javascript Node CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
 version: 2
 jobs:
   build:
@@ -9,11 +5,6 @@ jobs:
       # specify the version you desire here
       - image: circleci/node:10.0.0
       
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
     working_directory: ~/repo
 
     steps:
@@ -47,5 +38,16 @@ jobs:
           name: Creating /dist files with rollup
           command: rollup -c
 
+      - deploy:
+          name: Updating version num
+          command: |
+            if [[ "${CIRCLE_TAG}" =~ v[0-9]+(\.[0-9]+)* ]]; then
+              echo ${CIRCLE_TAG:1}
+            fi
+
       - store_artifacts:
           path: ~/repo/dist
+
+deployment:
+  trigger_tag:
+    tag: /.*/
