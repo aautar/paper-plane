@@ -26,19 +26,26 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: npm install
+      - run: 
+          name: Running npm install
+          command: npm install
 
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
         
-      # run tests!
-      - run: npm test
+      - run: 
+          name: Running tests
+          command: npm test
 
-      - run: sudo npm install --global rollup
+      - run: 
+          name: Installing rollup
+          command: sudo npm install --global rollup
       
-      - run: rollup -c
+      - run: 
+          name: Creating /dist files with rollup
+          command: rollup -c
 
       - store_artifacts:
           path: ~/repo/dist
