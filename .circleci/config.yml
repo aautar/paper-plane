@@ -43,7 +43,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
 
       - deploy:
-          name: Updating version num
+          name: Updating version num and publishing
           command: |
             if [[ "${CIRCLE_TAG}" =~ v[0-9]+(\.[0-9]+)* ]]; then
               npm --no-git-tag-version version ${CIRCLE_TAG:1}
