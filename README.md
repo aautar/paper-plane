@@ -84,3 +84,13 @@ PaperPlane.delete(
     successCallback
 );
 ```
+
+### Beacon Request
+Send an HTTP [beacon request](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon) to server.
+
+```
+PaperPlane.postBeacon(
+    '/analytics/view',
+    PaperPlane.makeJsonRequestData({}, headers)
+);
+```
