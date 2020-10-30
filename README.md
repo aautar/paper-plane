@@ -11,7 +11,9 @@ No dependencies
 
 `npm install paper-plane`
 
-Files for frontend can be referenced directly from `/dist` folder.
+paper-plane is an ES module.
+
+However, `dist/paperplan.min.js` is not (as browser support for ESM is not widespread), this file will create a `PaperPlane` object attached to the window (`window.PaperPlane`). This will likely change in the future.
 
 ## Usage
 
@@ -88,7 +90,7 @@ PaperPlane.delete(
 ### Beacon Request
 Send an HTTP [beacon request](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon) to server.
 
-```
+```javascript
 PaperPlane.postBeacon(
     '/analytics/view',
     PaperPlane.makeJsonRequestData({}, headers)
