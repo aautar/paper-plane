@@ -15,7 +15,7 @@ paper-plane is an ES module.
 
 However, `dist/paperplan.min.js` is not (as browser support for ESM is not widespread), this file will create a `PaperPlane` object attached to the window (`window.PaperPlane`). This will likely change in the future.
 
-## Usage
+## Fetching data
 
 ### GET Request
 ```javascript
@@ -45,6 +45,11 @@ PaperPlane.head(
 );
 ```
 
+## Sending data
+Sending data requires constructing a request payload with one of the PaperPlane helper methods. The examples below construct a JSON payload via `PaperPlane.makeJsonRequestData()`. 
+
+Sending [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) is also supported via `PaperPlane.makeFormDataRequestData()`.
+
 ### POST Request
 ```javascript
 const headers = new Map();
@@ -73,6 +78,18 @@ PaperPlane.put(
 );
 ```
 
+### Beacon Request
+Send an HTTP [beacon request](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon) to server.
+
+```javascript
+PaperPlane.postBeacon(
+    '/analytics/view',
+    PaperPlane.makeJsonRequestData({}, headers)
+);
+```
+
+## Removing data
+
 ### DELETE Request
 ```javascript
 const headers = new Map();
@@ -87,12 +104,3 @@ PaperPlane.delete(
 );
 ```
 
-### Beacon Request
-Send an HTTP [beacon request](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon) to server.
-
-```javascript
-PaperPlane.postBeacon(
-    '/analytics/view',
-    PaperPlane.makeJsonRequestData({}, headers)
-);
-```
