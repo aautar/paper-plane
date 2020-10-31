@@ -1,7 +1,8 @@
 const PaperPlane = {};
 
 PaperPlane.ContentType = {
-    APPLICATION_JSON: "application/json"
+    APPLICATION_JSON: "application/json",
+    OCTET_STEAM: "application/octet-stream"
 };
 
 /**
@@ -41,12 +42,26 @@ PaperPlane.makeFormDataRequestData = function(_data, _httpHeaders) {
  * @returns {Object}
  */
 PaperPlane.makeJsonRequestData = function(_data, _httpHeaders) {
-
     _httpHeaders = _httpHeaders || (new Map());
     _httpHeaders.set("Content-Type", PaperPlane.ContentType.APPLICATION_JSON);
 
     return {
         body: JSON.stringify(_data),
+        headers: _httpHeaders
+    };
+};
+
+/**
+ * @param {Blob} _blob
+ * @param {Map=} _httpHeaders
+ * @returns {Object}
+ */
+PaperPlane.makeBlobRequestData = function(_blob, _httpHeaders) {
+    _httpHeaders = _httpHeaders || (new Map());
+    _httpHeaders.set("Content-Type", _blob.type);
+
+    return {
+        body: _blob,
         headers: _httpHeaders
     };
 };

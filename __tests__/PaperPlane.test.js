@@ -17,7 +17,6 @@ beforeEach(() => {
 
 
 test('xhr makes successful ajax call and calls success callback', () => {
-
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
 
     const onSuccess = jest.fn();
@@ -36,7 +35,6 @@ test('xhr makes successful ajax call and calls success callback', () => {
 });
 
 test('xhr makes successful ajax call and calls success callback, with parsed JSON', () => {
-
     window.XMLHttpRequest = jest.fn().mockImplementation(
         () => ({
             open: jest.fn(),
@@ -65,7 +63,6 @@ test('xhr makes successful ajax call and calls success callback, with parsed JSO
 });
 
 test('xhr makes successful ajax call with headers', () => {
-
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
 
     const onSuccess = jest.fn();
@@ -84,7 +81,6 @@ test('xhr makes successful ajax call with headers', () => {
 
 
 test('xhr makes failed ajax call and calls failure callback', () => {
-
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
 
     const onSuccess = jest.fn();
@@ -137,7 +133,6 @@ test('xhr makes failed ajax call and calls failure callback, with bad response b
 });
 
 test('get makes successful ajax call and calls success callback', () => {
-
     window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
 
     const onSuccess = jest.fn();
@@ -152,4 +147,11 @@ test('get makes successful ajax call and calls success callback', () => {
     expect(xhr.open).toHaveBeenCalled();
     expect(xhr.send).toHaveBeenCalled();    
     expect(onSuccess).toHaveBeenCalled();    
+});
+
+test('makeBlobRequestData sets Content-Type header = Blob type', () => {
+    const testBlob = new Blob(['abc123'], {type: 'text/plain'});
+    const reqData = PaperPlane.makeBlobRequestData(testBlob);
+    
+    expect(reqData.headers.get('Content-Type')).toBe("text/plain");
 });
