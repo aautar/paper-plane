@@ -1,4 +1,4 @@
-import {PaperPlane} from '../src/PaperPlane';
+import {PaperPlane} from '../../src/PaperPlane';
 
 const xhrSuccessMockClass = () => ({
     open: jest.fn(),
