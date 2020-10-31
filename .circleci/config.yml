@@ -53,6 +53,11 @@ jobs:
       - store_artifacts:
           path: ~/repo/dist
 
-deployment:
-  trigger_tag:
-    tag: /.*/
+workflows:
+  version: 2
+  build-n-deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
