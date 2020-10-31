@@ -25,6 +25,10 @@ const startServer = function() {
         app.get('/', (req, res) => {
             res.send('Hello World!')
         });
+
+        app.post('/post-test', (req, res) => {
+            res.send('post data accepeted')
+        });        
         
         currentServer = app.listen(port, () => {
             resolve(app);
@@ -59,5 +63,17 @@ test('PaperPond.get() returns correct status code', (done) => {
         };
 
         PaperPlane.get("http://localhost:3000/", new Map(), cb);
+    });
+});
+
+test('PaperPond.post() makes POST request to server', (done) => {
+    startServer().then(() => {
+        const cb = (resp, xhr) => {
+            stopServer();
+            expect(xhr.requestHeaders).toBe("post data accepeted");
+            done();
+        };
+
+        PaperPlane.post("http://localhost:3000/post-test", PaperPlane.makeJsonRequestData({"key":"val"}), cb);
     });
 });
