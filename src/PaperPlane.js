@@ -58,9 +58,7 @@ PaperPlane.makeJsonRequestData = function(_data, _httpHeaders) {
  */
 PaperPlane.makeBlobRequestData = function(_blob, _httpHeaders) {
     _httpHeaders = _httpHeaders || (new Map());
-    if(typeof _httpHeaders.get('Content-Type') === 'undefined') {
-        _httpHeaders.set("Content-Type", PaperPlane.ContentType.OCTET_STEAM);
-    }   
+    _httpHeaders.set("Content-Type", _blob.type);
 
     return {
         body: _blob,
