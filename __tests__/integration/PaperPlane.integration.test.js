@@ -70,7 +70,7 @@ test('PaperPond.post() makes POST request to server', (done) => {
     startServer().then(() => {
         const cb = (resp, xhr) => {
             stopServer();
-            expect(xhr.requestHeaders).toBe("post data accepeted");
+            expect(resp).toBe("post data accepeted");
             done();
         };
 
