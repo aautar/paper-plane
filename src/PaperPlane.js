@@ -1,27 +1,40 @@
 const PaperPlane = {};
 
 PaperPlane.ContentType = {
-    APPLICATION_JSON: "application/json",
-    OCTET_STEAM: "application/octet-stream"
+    APPLICATION_JSON: "application/json"
+};
+
+PaperPlane.convertBlobToString = function(_blob, _onConvert) {
+    const reader = new FileReader();
+    reader.readAsText(_blob); 
+    reader.onloadend = function() {
+        _onConvert(reader.result);
+    };
 };
 
 /**
  * 
- * @param {XMLHttpRequest} _xhr 
- * @returns {String|Object}
+ * @param {Blob} _respBlob 
+ * @returns {String|Object|Blob}
  */
-PaperPlane.parseXHRResponseData = function(_xhr) {
-    if(_xhr.getResponseHeader('Content-Type') === PaperPlane.ContentType.APPLICATION_JSON) {
+PaperPlane.parseXHRResponseData = function(_respBlob, _onParseComplete) {
+    if(_respBlob.type === PaperPlane.ContentType.APPLICATION_JSON) {
         var parsedResponseBody = {};
         
         try {
-            parsedResponseBody = JSON.parse(_xhr.responseText);
+            PaperPlane.convertBlobToString(_respBlob, function(_blobTextual) {
+                parsedResponseBody = JSON.parse(_blobTextual);
+            });
         } catch (err) { }
 
-        return parsedResponseBody;
+        _onParseComplete(parsedResponseBody);
+    } else if(_respBlob.type.split('/')[0] === 'text') {
+        PaperPlane.convertBlobToString(_respBlob, function(_blobTextual) {
+            _onParseComplete(_blobTextual);
+        });
+    } else {
+        _onParseComplete(_respBlob);
     }
-
-    return _xhr.responseText;
 };
 
 /**
@@ -86,10 +99,10 @@ PaperPlane.makeBlobRequestData = function(_blob, _httpHeaders) {
  */
 PaperPlane.xhr = function(
     _method, 
-    _url, 
+    _url,
     _requestData,
-    _onSuccess, 
-    _onError, 
+    _onSuccess,
+    _onError,
     _onComplete
 ) {
     const httpHeaders = _requestData.headers;
@@ -97,8 +110,14 @@ PaperPlane.xhr = function(
     _onError = _onError || (() => {});        
     _onComplete = _onComplete || (() => {});    
 
-    const internalErrorHander = function(_xhr, _errorMessageHint) {          
-        _onError(_errorMessageHint || PaperPlane.parseXHRResponseData(xhr), xhr);
+    const internalErrorHander = function(_xhr, _errorMessageHint) {
+        if(_errorMessageHint) {
+            _onError(_errorMessageHint, xhr);
+        } else {
+            PaperPlane.parseXHRResponseData(xhr.response, function(_parsedResponse) {
+                _onError(_parsedResponse, xhr);
+            });
+        }
     };
 
     const xhr = new XMLHttpRequest();
@@ -108,12 +127,16 @@ PaperPlane.xhr = function(
         xhr.setRequestHeader(key, value);
     }
 
+    xhr.responseType = 'blob';
     xhr.timeout = 30000;
+
     xhr.onload = function() {
         if(xhr.status >= 400) {
             internalErrorHander(xhr);
         } else {
-            _onSuccess(PaperPlane.parseXHRResponseData(xhr), xhr);
+            PaperPlane.parseXHRResponseData(xhr.response, function(_parsedResponse) {
+                _onSuccess(_parsedResponse, xhr);
+            });
         }
     };
 
@@ -126,10 +149,12 @@ PaperPlane.xhr = function(
     };
 
     xhr.onloadend = function() {
-        _onComplete(PaperPlane.parseXHRResponseData(xhr), xhr);
+        PaperPlane.parseXHRResponseData(xhr.response, function(_parsedResponse) {
+            _onComplete(_parsedResponse, xhr);
+        });
     };
 
-    xhr.send(_requestData.body);    
+    xhr.send(_requestData.body);
 
     return xhr;
 };

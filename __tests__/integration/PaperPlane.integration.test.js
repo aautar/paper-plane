@@ -4,16 +4,18 @@
 const jsdom = require("jsdom");
 global.window = new jsdom.JSDOM().window;
 global.XMLHttpRequest = window.XMLHttpRequest;
+global.FileReader = window.FileReader;
 
 import {PaperPlane} from '../../src/PaperPlane';
 
 let currentServer = null;
+const serverPort = 3001;
 
 const startServer = function() {
     return new Promise((resolve, reject) => {
         const express = require('express');
         const app = express();
-        const port = 3000;
+        const port = serverPort;
         
         app.use(function(req, res, next) {
             // CORS setups b/c cross-domain requests are blocked
@@ -42,6 +44,10 @@ const stopServer = function() {
     }
 };
 
+beforeEach(() => {
+    stopServer();
+});
+
 test('PaperPond.get() returns correct response body', (done) => {
     startServer().then(() => {
         const cb = (resp) => {
@@ -50,7 +56,7 @@ test('PaperPond.get() returns correct response body', (done) => {
             done();
         };
 
-        PaperPlane.get("http://localhost:3000/", new Map(), cb);
+        PaperPlane.get(`http://localhost:${serverPort}/`, new Map(), cb);
     });
 });
 
@@ -62,7 +68,7 @@ test('PaperPond.get() returns correct status code', (done) => {
             done();
         };
 
-        PaperPlane.get("http://localhost:3000/", new Map(), cb);
+        PaperPlane.get(`http://localhost:${serverPort}/`, new Map(), cb);
     });
 });
 
@@ -74,6 +80,6 @@ test('PaperPond.post() makes POST request to server', (done) => {
             done();
         };
 
-        PaperPlane.post("http://localhost:3000/post-test", PaperPlane.makeJsonRequestData({"key":"val"}), cb);
+        PaperPlane.post(`http://localhost:${serverPort}/post-test`, PaperPlane.makeJsonRequestData({"key":"val"}), cb);
     });
 });

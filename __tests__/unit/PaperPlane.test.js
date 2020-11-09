@@ -1,15 +1,27 @@
 import {PaperPlane} from '../../src/PaperPlane';
 
+const plainTextBlob = new Blob(["test-response"], {type : 'text/plain'});
+const jsonBlob = new Blob([JSON.stringify({"message": "123"})], {type: 'application/json'});
+
 const xhrSuccessMockClass = () => ({
     open: jest.fn(),
     send: jest.fn(),
     setRequestHeader: jest.fn(),
     status: 200,
     readyState: 4,
-    responseText: 'test-response',
+    response: plainTextBlob,
     getResponseHeader: function() { return "text/plain"; }
 });
 
+PaperPlane.convertBlobToString = function(_blob, _onConvert) {
+    if(_blob === plainTextBlob) {
+        _onConvert('test-response');
+    }
+
+    if(_blob === jsonBlob) {
+        _onConvert(`{"message": "123"}`);
+    }
+};
 
 beforeEach(() => {
     jest.useFakeTimers();
@@ -42,9 +54,9 @@ test('xhr makes successful ajax call and calls success callback, with parsed JSO
             setRequestHeader: jest.fn(),
             status: 200,
             readyState: 4,
-            responseText: '{ "message": "123" }',
+            response: jsonBlob,
             getResponseHeader: function() { return "application/json"; }
-        })   
+        })
     );
 
     const onSuccess = jest.fn();
@@ -109,7 +121,7 @@ test('xhr makes failed ajax call and calls failure callback, with bad response b
         setRequestHeader: jest.fn(),
         status: 200,
         readyState: 4,
-        responseText: 'test-response',
+        response: plainTextBlob,
         getResponseHeader: function() { return "application/json"; }
     });
     
