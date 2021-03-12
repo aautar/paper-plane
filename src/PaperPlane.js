@@ -103,7 +103,8 @@ PaperPlane.xhr = function(
     _requestData,
     _onSuccess,
     _onError,
-    _onComplete
+    _onComplete,
+    _clientSettings
 ) {
     const httpHeaders = _requestData.headers;
     _onSuccess = _onSuccess || (() => {});
@@ -128,7 +129,12 @@ PaperPlane.xhr = function(
     }
 
     xhr.responseType = 'blob';
-    xhr.timeout = 30000;
+
+    if(_clientSettings && _clientSettings.timeout) {
+        xhr.timeout = _clientSettings.timeout;
+    } else {
+        xhr.timeout = 30000;
+    }
 
     xhr.onload = function() {
         if(xhr.status >= 400) {
