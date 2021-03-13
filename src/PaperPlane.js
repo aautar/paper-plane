@@ -21,13 +21,11 @@ PaperPlane.parseXHRResponseData = function(_respBlob, _onParseComplete) {
     if(_respBlob.type === PaperPlane.ContentType.APPLICATION_JSON) {
         var parsedResponseBody = {};
         
-        try {
-            PaperPlane.convertBlobToString(_respBlob, function(_blobTextual) {
-                parsedResponseBody = JSON.parse(_blobTextual);
-            });
-        } catch (err) { }
+        PaperPlane.convertBlobToString(_respBlob, function(_blobTextual) {
+            parsedResponseBody = JSON.parse(_blobTextual);
+            _onParseComplete(parsedResponseBody);
+        });
 
-        _onParseComplete(parsedResponseBody);
     } else if(_respBlob.type.split('/')[0] === 'text') {
         PaperPlane.convertBlobToString(_respBlob, function(_blobTextual) {
             _onParseComplete(_blobTextual);

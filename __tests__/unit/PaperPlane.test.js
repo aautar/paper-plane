@@ -14,12 +14,24 @@ const xhrSuccessMockClass = () => ({
 });
 
 PaperPlane.convertBlobToString = function(_blob, _onConvert) {
+    // Note that the actual PaperPlane.convertBlobToString implementation depends on the onloadend event being fired,
+    // the delay is simulated with setTimeout
     if(_blob === plainTextBlob) {
-        _onConvert('test-response');
+        setTimeout(
+            () => {
+                _onConvert('test-response');
+            }, 
+            0
+        );
     }
 
     if(_blob === jsonBlob) {
-        _onConvert(`{"message": "123"}`);
+        setTimeout(
+            () => {
+                _onConvert(`{"message": "123"}`);
+            }, 
+            0
+        );
     }
 };
 
@@ -42,7 +54,10 @@ test('xhr makes successful ajax call and calls success callback', () => {
     xhr.onload();
 
     expect(xhr.open).toHaveBeenCalled();
-    expect(xhr.send).toHaveBeenCalled();    
+    expect(xhr.send).toHaveBeenCalled();
+    
+    jest.runAllTimers();
+
     expect(onSuccess).toHaveBeenCalledWith('test-response', xhr);
 });
 
@@ -71,6 +86,9 @@ test('xhr makes successful ajax call and calls success callback, with parsed JSO
 
     expect(xhr.open).toHaveBeenCalled();
     expect(xhr.send).toHaveBeenCalled();    
+
+    jest.runAllTimers();
+
     expect(onSuccess).toHaveBeenCalledWith({ "message": "123" }, xhr);
 });
 
@@ -110,7 +128,10 @@ test('xhr makes failed ajax call and calls failure callback', () => {
     xhr.onload();
 
     expect(xhr.open).toHaveBeenCalled();
-    expect(xhr.send).toHaveBeenCalled();    
+    expect(xhr.send).toHaveBeenCalled();
+
+    jest.runAllTimers();
+
     expect(onFailure).toHaveBeenCalled();    
 });
 
@@ -140,7 +161,10 @@ test('xhr makes failed ajax call and calls failure callback, with bad response b
     xhr.onload();
 
     expect(xhr.open).toHaveBeenCalled();
-    expect(xhr.send).toHaveBeenCalled();    
+    expect(xhr.send).toHaveBeenCalled();
+
+    jest.runAllTimers();
+    
     expect(onFailure).toHaveBeenCalled();    
 });
 
@@ -157,7 +181,10 @@ test('get makes successful ajax call and calls success callback', () => {
     xhr.onload();
 
     expect(xhr.open).toHaveBeenCalled();
-    expect(xhr.send).toHaveBeenCalled();    
+    expect(xhr.send).toHaveBeenCalled();
+
+    jest.runAllTimers();
+
     expect(onSuccess).toHaveBeenCalled();    
 });
 

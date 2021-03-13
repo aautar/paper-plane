@@ -28,6 +28,11 @@ const startServer = function() {
             res.send('Hello World!')
         });
 
+        app.get('/json-test', (req, res) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({"x": "y"}));
+        });        
+
         app.post('/post-test', (req, res) => {
             res.send('post data accepeted')
         });        
