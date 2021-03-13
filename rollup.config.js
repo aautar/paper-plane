@@ -7,7 +7,7 @@ export default [
     output: {
       format: 'esm',
       sourcemap: true,
-      file: 'dist/paperplane.min.js'
+      file: 'dist/paper-plane.min.js'
     },
 	plugins: [
 		minify({
