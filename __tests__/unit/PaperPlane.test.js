@@ -3,6 +3,16 @@ import {PaperPlane} from '../../src/PaperPlane';
 const plainTextBlob = new Blob(["test-response"], {type : 'text/plain'});
 const jsonBlob = new Blob([JSON.stringify({"message": "123"})], {type: 'application/json'});
 
+const xhrClientFailureMockClass = () => ({
+    open: jest.fn(),
+    send: jest.fn(),
+    setRequestHeader: jest.fn(),
+    status: 1,
+    readyState: 4,
+    response: null,
+    getResponseHeader: function() { }
+});
+
 const xhrSuccessMockClass = () => ({
     open: jest.fn(),
     send: jest.fn(),
@@ -59,6 +69,31 @@ test('xhr makes successful ajax call and calls success callback', () => {
     jest.runAllTimers();
 
     expect(onSuccess).toHaveBeenCalledWith('test-response', xhr);
+});
+
+test('xhr makes successful ajax call and calls complete callback', () => {
+    window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
+
+    const onSuccess = jest.fn();
+    const onFailure = jest.fn();
+    const onComplete = jest.fn();
+    const xhr = PaperPlane.xhr(
+        "POST", 
+        "/test-url", 
+        PaperPlane.makeFormDataRequestData(new FormData(), new Map()), 
+        onSuccess,
+        onFailure,
+        onComplete
+    );
+
+    xhr.onloadend();
+
+    expect(xhr.open).toHaveBeenCalled();
+    expect(xhr.send).toHaveBeenCalled();
+    
+    jest.runAllTimers();
+
+    expect(onComplete).toHaveBeenCalledWith('test-response', xhr);
 });
 
 test('xhr makes successful ajax call and calls success callback, with parsed JSON', () => {
@@ -135,6 +170,87 @@ test('xhr makes failed ajax call and calls failure callback', () => {
     expect(onFailure).toHaveBeenCalled();    
 });
 
+test('xhr makes failed ajax call and calls complete callback', () => {
+    window.XMLHttpRequest = jest.fn().mockImplementation(xhrSuccessMockClass);
+
+    const onSuccess = jest.fn();
+    const onFailure = jest.fn();
+    const onComplete = jest.fn();
+
+    const xhr = PaperPlane.xhr(
+        "POST", 
+        "/test-url", 
+        PaperPlane.makeFormDataRequestData(new FormData(), new Map()),
+        onSuccess, 
+        onFailure,
+        onComplete
+    );
+
+    xhr.status = 500;
+    xhr.onloadend();
+
+    expect(xhr.open).toHaveBeenCalled();
+    expect(xhr.send).toHaveBeenCalled();
+
+    jest.runAllTimers();
+
+    expect(onComplete).toHaveBeenCalled();    
+});
+
+test('xhr calls failure callback on client timeout', () => {
+    window.XMLHttpRequest = jest.fn().mockImplementation(xhrClientFailureMockClass);
+
+    const onSuccess = jest.fn();
+    const onFailure = jest.fn();
+    const onComplete = jest.fn();
+
+    const xhr = PaperPlane.xhr(
+        "POST", 
+        "/test-url", 
+        PaperPlane.makeFormDataRequestData(new FormData(), new Map()),
+        onSuccess, 
+        onFailure,
+        onComplete
+    );
+
+    xhr.ontimeout();
+
+    expect(xhr.open).toHaveBeenCalled();
+    expect(xhr.send).toHaveBeenCalled();
+
+    jest.runAllTimers();
+
+    expect(onFailure).toHaveBeenCalled();    
+});
+
+test('xhr calls complete callback on client timeout', () => {
+    window.XMLHttpRequest = jest.fn().mockImplementation(xhrClientFailureMockClass);
+
+    const onSuccess = jest.fn();
+    const onFailure = jest.fn();
+    const onComplete = jest.fn();
+
+    const xhr = PaperPlane.xhr(
+        "POST", 
+        "/test-url", 
+        PaperPlane.makeFormDataRequestData(new FormData(), new Map()),
+        onSuccess, 
+        onFailure,
+        onComplete
+    );
+
+    xhr.ontimeout();
+    xhr.onloadend();
+
+    expect(xhr.open).toHaveBeenCalled();
+    expect(xhr.send).toHaveBeenCalled();
+
+    jest.runAllTimers();
+
+    expect(onComplete).toHaveBeenCalled();    
+});
+
+
 test('xhr makes failed ajax call and calls failure callback, with bad response body (JSON content expected, but invalid JSON in body)', () => {
     window.XMLHttpRequest = () => ({
         open: jest.fn(),
@@ -164,7 +280,7 @@ test('xhr makes failed ajax call and calls failure callback, with bad response b
     expect(xhr.send).toHaveBeenCalled();
 
     jest.runAllTimers();
-    
+
     expect(onFailure).toHaveBeenCalled();    
 });
 

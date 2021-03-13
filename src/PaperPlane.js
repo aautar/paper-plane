@@ -18,7 +18,7 @@ PaperPlane.convertBlobToString = function(_blob, _onConvert) {
  * @returns {String|Object|Blob}
  */
 PaperPlane.parseXHRResponseData = function(_respBlob, _onParseComplete) {
-    if(_respBlob.type === PaperPlane.ContentType.APPLICATION_JSON) {
+    if(_respBlob && _respBlob.type === PaperPlane.ContentType.APPLICATION_JSON) {
         var parsedResponseBody = {};
         
         PaperPlane.convertBlobToString(_respBlob, function(_blobTextual) {
@@ -26,7 +26,7 @@ PaperPlane.parseXHRResponseData = function(_respBlob, _onParseComplete) {
             _onParseComplete(parsedResponseBody);
         });
 
-    } else if(_respBlob.type.split('/')[0] === 'text') {
+    } else if(_respBlob && _respBlob.type.split('/')[0] === 'text') {
         PaperPlane.convertBlobToString(_respBlob, function(_blobTextual) {
             _onParseComplete(_blobTextual);
         });
