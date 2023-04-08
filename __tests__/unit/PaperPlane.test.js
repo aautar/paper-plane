@@ -318,5 +318,5 @@ test('makeUrlQueryString returns encoded query string', () => {
 
     const queryString = PaperPlane.makeUrlQueryString(params);
     
-    expect(queryString).toBe("text/plain");
+    expect(queryString).toBe("?p1=100%25&p2=path%2Fpath");
 });
