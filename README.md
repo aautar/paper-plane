@@ -46,11 +46,13 @@ PaperPlane.head(
 ```
 
 ## Sending data
-Sending data requires constructing a request payload with one of the PaperPlane helper methods. The examples below construct a JSON payload via `PaperPlane.makeJsonRequestData()`. 
+Sending data requires constructing a request payload or query string with one of the PaperPlane helper methods. The examples below construct a JSON payload via `PaperPlane.makeJsonRequestData()`. 
 
-Sending [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) is supported via `PaperPlane.makeFormDataRequestData()`.
+Constructing a payload from [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) is supported via `PaperPlane.makeFormDataRequestData()`.
 
-Directly sending a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) (or [File](https://developer.mozilla.org/en-US/docs/Web/API/File), as a File is a Blob) is supported via `PaperPlane.makeBlobRequestData()`.
+Constructing a payload from a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) (or [File](https://developer.mozilla.org/en-US/docs/Web/API/File), as a File is a Blob) is supported via `PaperPlane.makeBlobRequestData()`.
+
+Constructing a query string (to append to an endpoint) is supported via `PaperPlane.makeUrlQueryString()`
 
 ### POST Request
 ```javascript
