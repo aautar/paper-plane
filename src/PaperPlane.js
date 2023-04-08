@@ -84,6 +84,19 @@ PaperPlane.makeBlobRequestData = function(_blob, _httpHeaders) {
 
 
 /**
+ * @param {Map} _params
+ * @returns {String}
+ */
+ PaperPlane.makeUrlQueryString = function(_params) {
+    const queryParts = [];
+    for (let [key, value] of _params) {
+        queryParts.push(`${key}=${encodeURIComponent(value)}`);
+    }
+
+    return "?" + queryParts.join("&");
+};
+
+/**
  * @callback PaperPlane~responseCallback
  * @param {String|Object} responseData
  * @param {XMLHttpRequest} xhr

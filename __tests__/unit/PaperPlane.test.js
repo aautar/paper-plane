@@ -310,3 +310,13 @@ test('makeBlobRequestData sets Content-Type header = Blob type', () => {
     
     expect(reqData.headers.get('Content-Type')).toBe("text/plain");
 });
+
+test('makeUrlQueryString returns encoded query string', () => {
+    const params = new Map();
+    params.set("p1", "100%");
+    params.set("p2", "path/path");
+
+    const queryString = PaperPlane.makeUrlQueryString(params);
+    
+    expect(queryString).toBe("text/plain");
+});
