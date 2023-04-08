@@ -35,7 +35,7 @@ jobs:
       
       - run: 
           name: Creating /dist files with rollup
-          command: rollup -c
+          command: npm run build
 
       - run:
           name: Authenticate with registry

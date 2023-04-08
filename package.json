@@ -5,7 +5,9 @@
   "repository": "https://github.com/aautar/paper-plane.git",
   "author": "Avishkar Autar <aautar@digital-radiation.com>",
   "license": "MIT",
+  "type": "module",
   "scripts": {
+    "build": "npx rollup -c",
     "test": "jest"
   },
   "jest": {
